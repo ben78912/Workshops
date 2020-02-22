@@ -18,6 +18,7 @@ export class MuseComponent implements OnInit {
 
   cur_data = new Array<number>();
   channels = [];
+  bad_data = 0;
 
   // dummy data to test whether ngFor works
 
@@ -53,7 +54,35 @@ export class MuseComponent implements OnInit {
    */
   stream() {
 
+    let index = 0;
+
     this.data.subscribe((sample) => {
+
+      this.bad_data = 0;
+
+      this.cur_data = sample.data.slice(0, 4).map(Number);
+
+      const json_data = {
+        'TP9': this.cur_data[0],
+        'AF7': this.cur_data[1],
+        'AF8': this.cur_data[2],
+        'TP10': this.cur_data[3]
+      };
+
+      for (let i = 0; i < 4; i++) {
+        if (isNaN(this.cur_data[i])) {
+          this.bad_data = 1;
+        }
+      }
+
+      if (this.bad_data === 0) {
+        this.channels.push(json_data);
+        index += 1;
+
+        if (index > 10) {
+          this.channels.shift();
+        }
+      }
 
       // ----------------- TO DO --------------------
 
